@@ -11,13 +11,15 @@ const productsSchema = new Schema({
     },
     unit:{
         type: String,
-        
+        default: "",
+        required: true,
     },
     image:{
         type: String,
     },
     category:{
         type: String,
+        enum:["Dairy","Bread", "Eggs","Others"],
         required: true,
     },
     stock:{

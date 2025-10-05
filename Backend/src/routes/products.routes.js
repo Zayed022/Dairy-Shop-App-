@@ -6,6 +6,7 @@ import { addProduct,
     updateProductUnitAndPrice,
     getAllProducts,
     getProductById,
+    getProductsByCategory,
  } from "../controllers/products.controllers.js";
 
 const router = Router();
@@ -25,5 +26,6 @@ router.route("/:id").get(getProductById)
 router.delete("/delete", deleteProduct);
 router.put("/:id/update-unit-price", updateProductUnitAndPrice);
 router.put("/:id/update-stock", updateProductStock);
+router.get("/category/:category", getProductsByCategory);
 
 export default router;
