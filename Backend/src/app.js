@@ -18,5 +18,11 @@ app.use("/api/v1/products",productRoute);
 import orderRoute from "./routes/orders.routes.js"
 app.use("/api/v1/orders",orderRoute);
 
+import feeRoute from "./routes/fee.routes.js"
+app.use("/api/v1/fee",feeRoute);
+
+import settingRoute from "./routes/settings.routes.js"
+app.use("/api/v1/settings",settingRoute);
+
 
 export {app}
