@@ -52,20 +52,14 @@ const deleteProduct = async (req, res) => {
 };
 
 
-
-
-// Get all products or search products by name
 const getAllProducts = async (req, res) => {
   try {
     const searchQuery = req.query.search || "";
-    const regex = new RegExp(searchQuery, "i"); // case-insensitive search
+    const regex = new RegExp(searchQuery, "i");
 
-    // Fetch products filtered by name (or all if no search query)
     const products = await Product.find({ name: regex }).sort({ createdAt: -1 });
-
     res.status(200).json(products);
   } catch (error) {
-    console.error("Error fetching products:", error);
     res.status(500).json({ message: "Error fetching products", error: error.message });
   }
 };
