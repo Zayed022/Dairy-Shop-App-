@@ -51,7 +51,6 @@ const deleteProduct = async (req, res) => {
   res.status(200).json({ message: "Product deleted successfully" });
 };
 
-
 const getAllProducts = async (req, res) => {
   try {
     const searchQuery = req.query.search || "";
@@ -157,6 +156,15 @@ const getProductsByCategory = async (req, res) => {
   }
 };
 
+const getAllProductsForAdmin = async (req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch products" });
+  }
+};
+
 
 
 export {
@@ -167,4 +175,5 @@ export {
     updateProductUnitAndPrice,
     updateProductStock,
     getProductsByCategory,
+    getAllProductsForAdmin,
 }
