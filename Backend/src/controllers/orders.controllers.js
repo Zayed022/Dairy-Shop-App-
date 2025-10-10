@@ -5,20 +5,17 @@ const placeOrder = async (req, res) => {
   try {
     const { items, customer, totalAmount } = req.body;
 
-    // Validation
     if (!customer || !items?.length) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Calculate final amount (you can also add delivery fee here if needed)
     const finalAmount = totalAmount;
 
-    // Create order
     const order = await Order.create({
-      customer,
+      customer, // ✅ nested object will be saved if schema allows it
       items,
       totalAmount: finalAmount,
-      status: "Pending" // matches your schema enum
+      status: "Pending",
     });
 
     return res.status(201).json({
@@ -34,6 +31,7 @@ const placeOrder = async (req, res) => {
     });
   }
 };
+
 
 
 const getAllOrders = async (req,res) => {
