@@ -7,6 +7,10 @@ import { addProduct,
     getAllProducts,
     getProductById,
     getProductsByCategory,
+    getAllProductsForAdmin,
+    deleteProductByAdmin,
+    updateProductByAdmin,
+    updateStockByAdmin,
  } from "../controllers/products.controllers.js";
 
 const router = Router();
@@ -27,5 +31,9 @@ router.delete("/delete", deleteProduct);
 router.put("/:id/update-unit-price", updateProductUnitAndPrice);
 router.put("/:id/update-stock", updateProductStock);
 router.get("/category/:category", getProductsByCategory);
+router.get("/", getAllProductsForAdmin);
+router.delete("/:id", deleteProductByAdmin);
+router.put("/:id", updateProductByAdmin);
+router.patch("/:id/stock", updateStockByAdmin);
 
 export default router;

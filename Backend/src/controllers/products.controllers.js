@@ -165,6 +165,59 @@ const getAllProductsForAdmin = async (req, res) => {
   }
 };
 
+const deleteProductByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Product.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: "Product not found" });
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete product" });
+  }
+};
+
+
+const updateProductByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, unit, price, category } = req.body;
+
+    const updated = await Product.findByIdAndUpdate(
+      id,
+      { name, unit, price, category },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Product not found" });
+
+    res.status(200).json({ updated, message: "Product updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update product" });
+  }
+};
+
+
+const updateStockByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { stock } = req.body;
+
+    const updated = await Product.findByIdAndUpdate(
+      id,
+      { stock },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Product not found" });
+
+    res.status(200).json({ updated, message: "Stock updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update stock" });
+  }
+};
+
+
+
 
 
 export {
@@ -176,4 +229,7 @@ export {
     updateProductStock,
     getProductsByCategory,
     getAllProductsForAdmin,
+    deleteProductByAdmin,
+    updateProductByAdmin,
+    updateStockByAdmin,
 }
