@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const actions = [
-  { title: 'View Orders', path: '/orders/' },
+  { title: 'View Orders', path: '/orders/view-orders' },
   { title: 'Manage Orders', path: '/orders/manage' },
   
 ];

@@ -6,6 +6,8 @@ import AddProduct from "./components/Products/AddProduct";
 import ManageProducts from "./components/Products/ManageProducts";
 import Orders from "./components/Orders/Orders";
 import ViewOrders from "./components/Orders/ViewOrders";
+import FeeManagement from "./components/DeliveryCharges/FeeManagement";
+import ManageCODSettings from "./components/CODSetting/ManageCODSetting";
 
 
 const App = () => {
@@ -20,7 +22,9 @@ const App = () => {
             <Route path="/products/add" element={<AddProduct />} />
             <Route path="/products/update" element={<ManageProducts />} />
             <Route path="/orders" element={<Orders />} />
-            <Route path="/orders/" element={<ViewOrders />} />
+            <Route path="/orders/view-orders" element={<ViewOrders />} />
+            <Route path="/delivery" element={<FeeManagement />} />
+            <Route path="/settings" element={<ManageCODSettings />} />
             
          
         

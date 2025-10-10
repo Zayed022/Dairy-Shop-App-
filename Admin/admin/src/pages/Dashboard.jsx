@@ -23,7 +23,7 @@ const Dashboard = () => {
       title: "Delivery Charges",
       description: "Set or edit delivery fees",
       color: "bg-yellow-500",
-      path: "/delivery-charges",
+      path: "/delivery",
       icon: "💸",
     },
     {
