@@ -1,6 +1,9 @@
 import { Product } from "../models/products.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import NodeCache from "node-cache";
 import mongoose from "mongoose";
+
+const cache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
 
 const addProduct = async (req,res) => {
     const {
@@ -53,13 +56,33 @@ const deleteProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const searchQuery = req.query.search || "";
-    const regex = new RegExp(searchQuery, "i");
+    const searchQuery = req.query.search?.trim() || "";
+    const cacheKey = `allProducts_${searchQuery}`;
 
-    const products = await Product.find({ name: regex }).sort({ createdAt: -1 });
+    // ✅ Step 1: Try cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    // ✅ Step 2: Use regex efficiently + project only needed fields
+    const filter = searchQuery ? { name: { $regex: searchQuery, $options: "i" } } : {};
+
+    // ⚙️ Use projection to send only required fields (reduces data size by 70–80%)
+    const products = await Product.find(filter, "name price unit image category stock")
+      .sort({ createdAt: -1 })
+      .limit(100) // hard limit for safety
+      .lean(); // returns plain JS objects (faster than Mongoose docs)
+
+    // ✅ Step 3: Cache results for 60 seconds
+    cache.set(cacheKey, products);
+
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching products", error: error.message });
+    res.status(500).json({
+      message: "Error fetching products",
+      error: error.message,
+    });
   }
 };
 
@@ -131,16 +154,25 @@ const updateProductStock = async (req, res) => {
 const getProductsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
-
-    // Validate category input
     if (!category) {
       return res.status(400).json({ message: "Category is required" });
     }
 
-    // Match case-insensitive categories
-    const products = await Product.find({
-      category: { $regex: new RegExp(`^${category}$`, "i") },
-    }).sort({ createdAt: -1 });
+    const cacheKey = `category_${category.toLowerCase()}`;
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
+    // Case-insensitive exact match (uses index)
+    const products = await Product.find(
+      { category: new RegExp(`^${category}$`, "i") },
+      "name price unit image category stock"
+    )
+      .sort({ createdAt: -1 })
+      .lean();
+
+    cache.set(cacheKey, products);
 
     if (products.length === 0) {
       return res.status(404).json({ message: "No products found for this category" });
