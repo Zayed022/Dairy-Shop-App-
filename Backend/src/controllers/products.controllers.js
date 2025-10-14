@@ -57,7 +57,7 @@ const deleteProduct = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const searchQuery = req.query.search?.trim() || "";
-    const cacheKey = `allProducts_${searchQuery}`;
+    const cacheKey = `allProducts_${searchQuery}_alphabetical`;
 
     // ✅ Step 1: Try cache first
     const cachedData = cache.get(cacheKey);
@@ -65,16 +65,17 @@ const getAllProducts = async (req, res) => {
       return res.status(200).json(cachedData);
     }
 
-    // ✅ Step 2: Use regex efficiently + project only needed fields
+    // ✅ Step 2: Build filter (case-insensitive search)
     const filter = searchQuery ? { name: { $regex: searchQuery, $options: "i" } } : {};
 
-    // ⚙️ Use projection to send only required fields (reduces data size by 70–80%)
+    // ✅ Step 3: Fetch alphabetically sorted products
     const products = await Product.find(filter, "name price unit image category stock")
-      .sort({ createdAt: -1 })
-      .limit(100) // hard limit for safety
-      .lean(); // returns plain JS objects (faster than Mongoose docs)
+      .sort({ name: 1 }) // 👈 Alphabetical order (A → Z)
+      .collation({ locale: "en", strength: 2 }) // 👈 Case-insensitive sort
+      .limit(100)
+      .lean();
 
-    // ✅ Step 3: Cache results for 60 seconds
+    // ✅ Step 4: Cache results for 60 seconds
     cache.set(cacheKey, products);
 
     res.status(200).json(products);
