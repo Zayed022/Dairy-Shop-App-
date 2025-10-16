@@ -57,29 +57,43 @@ const deleteProduct = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const searchQuery = req.query.search?.trim() || "";
-    const cacheKey = `allProducts_${searchQuery}_alphabetical`;
+    const cacheKey = `allProducts_${searchQuery.toLowerCase()}_alphabetical`;
 
-    // ✅ Step 1: Try cache first
+    // ✅ 1️⃣ Try cache first
     const cachedData = cache.get(cacheKey);
     if (cachedData) {
       return res.status(200).json(cachedData);
     }
 
-    // ✅ Step 2: Build filter (case-insensitive search)
-    const filter = searchQuery ? { name: { $regex: searchQuery, $options: "i" } } : {};
+    // ✅ 2️⃣ Build filter (case-insensitive search)
+    const filter = searchQuery
+      ? { name: { $regex: searchQuery, $options: "i" } }
+      : {};
 
-    // ✅ Step 3: Fetch alphabetically sorted products
+    // ✅ 3️⃣ Fetch only needed fields, sort alphabetically (case-insensitive)
     const products = await Product.find(filter, "name price unit image category stock")
-      .sort({ name: 1 }) // 👈 Alphabetical order (A → Z)
-      .collation({ locale: "en", strength: 2 }) // 👈 Case-insensitive sort
+      .collation({ locale: "en", strength: 2 }) // ensures A=a sorting
+      .sort({ name: 1 })
       .limit(100)
       .lean();
 
-    // ✅ Step 4: Cache results for 60 seconds
-    cache.set(cacheKey, products);
+    // ✅ 4️⃣ Normalize image URLs (for React Native loading)
+    const BASE_URL = process.env.BASE_URL || "https://dairy-shop-app-4.onrender.com";
+    const formattedProducts = products.map((p) => ({
+      ...p,
+      image:
+        p.image?.startsWith("http") || !p.image
+          ? p.image || ""
+          : `${BASE_URL}/uploads/${p.image}`,
+    }));
 
-    res.status(200).json(products);
+    // ✅ 5️⃣ Cache results for 60 seconds
+    cache.set(cacheKey, formattedProducts);
+
+    // ✅ 6️⃣ Send fast response
+    res.status(200).json(formattedProducts);
   } catch (error) {
+    console.error("❌ Error fetching products:", error);
     res.status(500).json({
       message: "Error fetching products",
       error: error.message,
